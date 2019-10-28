@@ -18,8 +18,8 @@ server.post('/users', (req, res) => {
     console.log('user info', userInfo);
 
     db.insert(userInfo).then(user => {
-        res.status(201).json(user);
-    }).catch(err => { console.log('error', err); res.status(500).json({error: 'Please provide name and bio for the user'})})
+        res.status(201).json(user, "created");
+    }).catch(err => { console.log('error', err); res.status(400).json({error: 'Please provide name and bio for the user'})})
 
 })
 
@@ -39,7 +39,7 @@ server.get('/users/:id', (req, res) => {
     const id = req.params.id;
     db.findById(id).then( i => {
         res.status(200).json({i})
-    }).catch(err => { console.log('error', err); res.status(500).json({error: 'failed to find user '}) })
+    }).catch(err => { console.log('error', err); res.status(500).json({error: 'The user with the specified ID does not exist '}) })
 })
 
 
@@ -50,7 +50,7 @@ server.delete('/users/:id', (req, res) => {
     db.remove(id).then(out => {
         res.status(200).json({message: `user with Id ${id} its been deleted`});
 
-    }).catch(err => { console.log('error', err); res.status(500).json({ error: 'failed to delete user from data base' }); })
+    }).catch(err => { console.log('error', err); res.status(500).json({ error: 'The user with the specified ID does not exist' }); })
 })
 
 
@@ -60,9 +60,29 @@ server.put('/users/:id', (req, res) => {
     const id = req.params.id;
     userUpdate = req.body;
 
-    db.update(id, userUpdate).then(a => {
-        res.status(200).json({message: "user has been updated"})
+     if(!req.body.name || !req.body.bio){
+
+       res.status(400).json({ errorMessage: "Please provide name and bio for the user"}) 
+     }else{
+
+    db.update(id, userUpdate).then(a => { 
+    
+        res.status(200).json({a, message: "user has been updated"})
+    
+
+
+
+        
+       })
+     
+  .catch(err => {
+     
+      
+       
+            res.status(404).json({ message: "The user with the specified ID does not exist." })
+        
     })
+}
 })
 
 
